@@ -69,13 +69,85 @@ Follow the instructions provided by the `pm2 startup` command to complete the se
 This section outlines the steps to install and configure your PostgreSQL database.
 Replace `[Your Database Name]` and `[Your Database User]` with your desired names, and `[Your Strong Password]` with a secure password.
 
+## Database Installation and Configuration
+
+This section outlines the steps to install and configure your PostgreSQL database. Replace `[Your Database Name]` and `[Your Database User]` with your desired names, and `[Your Strong Password]` with a secure password.
+
 ### Installing the Database Server
 
 1.  **Install PostgreSQL:**
     Use `dnf` to install the PostgreSQL server and client:
 
 
-1.  **Install the database server:**
+bash sudo dnf install postgresql-server postgresql
+
+2.  **Initialize the Database:**
+    Initialize the PostgreSQL database:
+
+
+bash sudo postgresql-setup --initdb
+
+3.  **Start the PostgreSQL Service:**
+    Start the PostgreSQL service and enable it to start on boot:
+
+
+bash sudo systemctl start postgresql sudo systemctl enable postgresql
+
+### Configuring the Database
+
+1.  **Switch to the `postgres` user:**
+    The `postgres` user is the default superuser for PostgreSQL.
+
+
+bash sudo su - postgres
+
+2.  **Create a new database:**
+    Create a database for your project. Replace `[Your Database Name]` with your desired database name.
+
+
+bash createdb [Your Database Name]
+
+3.  **Create a new database user:**
+    Create a user for your project's application to connect to the database. Replace `[Your Database User]` and `[Your Strong Password]` with your desired username and a strong password.
+
+
+bash createuser --interactive --pwprompt [Your Database User]
+
+When prompted, enter the password you want for the user and answer the questions about the user's privileges (usually, you'll want this user to be able to create databases and roles, but grant necessary privileges based on your application's needs).
+
+4.  **Grant privileges to the user:**
+    Grant the necessary privileges on your database to the new user. Replace `[Your Database Name]` and `[Your Database User]` accordingly.
+
+
+sql GRANT ALL PRIVILEGES ON DATABASE [Your Database Name] TO [Your Database User];
+
+5.  **Exit the `postgres` user session:**
+
+
+bash exit
+
+### Database Schema (Example)
+
+This is an **example** database schema based on the types seen in the project (users, events, donations, group chats, news posts). **You will need to adapt this schema to your project's specific requirements.**
+
+
+sql -- Example Users Table CREATE TABLE users ( id SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE NOT NULL, email VARCHAR(255) UNIQUE NOT NULL, password_hash VARCHAR(255) NOT NULL, created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP );
+
+-- Example Events Table CREATE TABLE events ( id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, description TEXT, event_date TIMESTAMP WITH TIME ZONE NOT NULL, location VARCHAR(255), created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, created_by INT REFERENCES users(id) ON DELETE SET NULL );
+
+-- Example Donations Table CREATE TABLE donations ( id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id) ON DELETE SET NULL, amount DECIMAL(10, 2) NOT NULL, donation_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP );
+
+-- Example Group Chats Table CREATE TABLE group_chats ( id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP );
+
+-- Example News Posts Table CREATE TABLE news_posts ( id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, content TEXT NOT NULL, published_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, author_id INT REFERENCES users(id) ON DELETE SET NULL );
+
+-- Example table for linking users and group chats (many-to-many relationship) CREATE TABLE user_group_chats ( user_id INT REFERENCES users(id) ON DELETE CASCADE, group_chat_id INT REFERENCES group_chats(id) ON DELETE CASCADE, PRIMARY KEY (user_id, group_chat_id) );
+
+-- You will need to add more tables and relationships based on your application's needs. -- Consider tables for messages within group chats, comments on news posts, etc.
+
+### Connecting Your Application
+
+Update your application's configuration to connect to the PostgreSQL database
 ```
 nginx
     server {
