@@ -66,9 +66,14 @@ Follow the instructions provided by the `pm2 startup` command to complete the se
 
 ## Database Installation and Configuration
 
-This section outlines the steps to install and configure your database. Replace `[Your Database Type]` with the specific database you are using (e.g., PostgreSQL, MySQL).
+This section outlines the steps to install and configure your PostgreSQL database.
+Replace `[Your Database Name]` and `[Your Database User]` with your desired names, and `[Your Strong Password]` with a secure password.
 
 ### Installing the Database Server
+
+1.  **Install PostgreSQL:**
+    Use `dnf` to install the PostgreSQL server and client:
+
 
 1.  **Install the database server:**
 ```
